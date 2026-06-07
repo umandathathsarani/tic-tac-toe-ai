@@ -33,10 +33,10 @@ class CampaignGUI:
         
         try:
             pygame.mixer.init()
-            self.snd_move = pygame.mixer.Sound("move.wav")
-            self.snd_win = pygame.mixer.Sound("win.wav")
-            self.snd_lose = pygame.mixer.Sound("lose.wav")
-            self.snd_tie = pygame.mixer.Sound("tie.wav")
+            self.snd_move = pygame.mixer.Sound(os.path.join("audio", "move.wav"))
+            self.snd_win = pygame.mixer.Sound(os.path.join("audio", "win.wav"))
+            self.snd_lose = pygame.mixer.Sound(os.path.join("audio", "lose.wav"))
+            self.snd_tie = pygame.mixer.Sound(os.path.join("audio", "tie.wav"))
             self.audio = True
         except:
             self.audio = False
