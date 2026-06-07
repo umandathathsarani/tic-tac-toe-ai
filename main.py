@@ -113,7 +113,9 @@ class CampaignGUI:
             self.cleanup_board()
             return True
         elif not self.game.empty_squares():
-            messagebox.showinfo("Tie", "No more moves! Try again.")
+            messagebox.showinfo("Survival!", "It's a tie! You survived the AI. Moving to next level!")
+            self.current_level += 1
+            self.save_progress(self.current_level)
             self.cleanup_board()
             return True
         return False
