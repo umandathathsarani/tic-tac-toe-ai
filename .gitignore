@@ -1,4 +1,19 @@
-# Python cache files
+# Python Cache
 __pycache__/
 *.pyc
+
+# PyInstaller Build Artifacts
+build/
+dist/
+*.spec
+
+# Game Save Data (Prevents tracking personal level progress)
 save_data.json
+
+# Virtual Environments
+venv/
+env/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
