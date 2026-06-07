@@ -126,8 +126,8 @@ To distribute the game as a professional .exe file without requiring Python inst
   After the build completes, find the main.exe in the dist/ folder. Ensure you copy your audio/ directory into the same location as main.exe to enable in-game sound effects.
 
   And if there is no save_data.json file inside that dist folder craate that file and inside that file include this line and save them: ``` {"level": 1} ``` 
-  Then again run that previous line: ``` pyinstaller --onefile --windowed main.py ```
-  
+  . Then again run that previous line: ``` pyinstaller --onefile --windowed main.py ```
+
 ---
 
 # 🧠 AI Implementation Details
