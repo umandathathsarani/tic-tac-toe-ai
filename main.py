@@ -3,6 +3,7 @@ from tkinter import messagebox
 import json
 import os
 import random
+import pygame
 from game import TicTacToe
 from ai import minimax
 
@@ -30,6 +31,16 @@ class CampaignGUI:
         self.current_square_size = 0
         self.allow_resize = False
         
+        try:
+            pygame.mixer.init()
+            self.snd_move = pygame.mixer.Sound("move.wav")
+            self.snd_win = pygame.mixer.Sound("win.wav")
+            self.snd_lose = pygame.mixer.Sound("lose.wav")
+            self.snd_tie = pygame.mixer.Sound("tie.wav")
+            self.audio = True
+        except:
+            self.audio = False
+        
         self.current_level = self.load_progress()
         self.game = None
         self.buttons = []
@@ -39,6 +50,13 @@ class CampaignGUI:
         self.main_frame.bind("<Configure>", self.on_resize)
         
         self.setup_menu()
+
+    def play_sound(self, sound_obj):
+        if self.audio:
+            try:
+                sound_obj.play()
+            except:
+                pass
 
     def on_resize(self, event):
         if not getattr(self, 'allow_resize', False):
@@ -171,6 +189,7 @@ class CampaignGUI:
         if self.game.board[square] == ' ' and not self.game.current_winner:
             self.game.make_move(square, 'X')
             self.buttons[square].config(text='X', fg=THEME["x_color"])
+            self.play_sound(self.snd_move)
             
             if self.check_game_over():
                 return
@@ -186,20 +205,24 @@ class CampaignGUI:
         if square is not None:
             self.game.make_move(square, 'O')
             self.buttons[square].config(text='O', fg=THEME["o_color"])
+            self.play_sound(self.snd_move)
             self.check_game_over()
 
     def check_game_over(self):
         if self.game.current_winner == 'X':
+            self.play_sound(self.snd_win)
             messagebox.showinfo("Victory!", f"You beat Level {self.current_level}!")
             self.current_level += 1
             self.save_progress(self.current_level)
             self.cleanup_board()
             return True
         elif self.game.current_winner == 'O':
+            self.play_sound(self.snd_lose)
             messagebox.showinfo("Defeat", "The AI wins. Try again!")
             self.cleanup_board()
             return True
         elif not self.game.empty_squares():
+            self.play_sound(self.snd_tie)
             messagebox.showinfo("Survival!", "It's a tie! You survived the AI. Moving to next level!")
             self.current_level += 1
             self.save_progress(self.current_level)
