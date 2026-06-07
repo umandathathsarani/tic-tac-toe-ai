@@ -4,6 +4,7 @@ import json
 import os
 import random
 import pygame
+import sys
 from game import TicTacToe
 from ai import minimax
 
@@ -27,16 +28,21 @@ class CampaignGUI:
         self.root.configure(bg=THEME["bg"])
         self.root.geometry("+300+150")
         
+        if getattr(sys, 'frozen', False):
+            base_path = os.path.dirname(sys.executable)
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
         self.pixel = tk.PhotoImage(width=1, height=1)
         self.current_square_size = 0
         self.allow_resize = False
         
         try:
             pygame.mixer.init()
-            self.snd_move = pygame.mixer.Sound(os.path.join("audio", "move.wav"))
-            self.snd_win = pygame.mixer.Sound(os.path.join("audio", "win.wav"))
-            self.snd_lose = pygame.mixer.Sound(os.path.join("audio", "lose.wav"))
-            self.snd_tie = pygame.mixer.Sound(os.path.join("audio", "tie.wav"))
+            self.snd_move = pygame.mixer.Sound(os.path.join(base_path, "audio", "move.wav"))
+            self.snd_win = pygame.mixer.Sound(os.path.join(base_path, "audio", "win.wav"))
+            self.snd_lose = pygame.mixer.Sound(os.path.join(base_path, "audio", "lose.wav"))
+            self.snd_tie = pygame.mixer.Sound(os.path.join(base_path, "audio", "tie.wav"))
             self.audio = True
         except:
             self.audio = False
@@ -104,10 +110,13 @@ class CampaignGUI:
         return {"grid_size": grid_size, "win_req": win_req, "dead": dead}
 
     def load_progress(self):
-        if os.path.exists(SAVE_FILE):
-            with open(SAVE_FILE, "r") as f:
-                data = json.load(f)
-                return data.get("level", 1)
+        if os.path.exists(SAVE_FILE) and os.path.getsize(SAVE_FILE) > 0:
+            try:
+                with open(SAVE_FILE, "r") as f:
+                    data = json.load(f)
+                    return data.get("level", 1)
+            except json.JSONDecodeError:
+                return 1
         return 1
 
     def save_progress(self, level):
