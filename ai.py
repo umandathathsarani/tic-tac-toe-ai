@@ -1,6 +1,6 @@
 import math
 
-def minimax(state, player):
+def minimax(state, player, alpha=-math.inf, beta=math.inf):
     max_player = 'O'
     other_player = 'O' if player == 'X' else 'X'
 
@@ -16,7 +16,7 @@ def minimax(state, player):
 
     for possible_move in state.available_moves():
         state.make_move(possible_move, player)
-        sim_score = minimax(state, other_player)
+        sim_score = minimax(state, other_player, alpha, beta)
         
         state.board[possible_move] = ' '
         state.current_winner = None
@@ -25,7 +25,13 @@ def minimax(state, player):
         if player == max_player:
             if sim_score['score'] > best['score']:
                 best = sim_score
+            alpha = max(alpha, best['score'])
         else:
             if sim_score['score'] < best['score']:
                 best = sim_score
+            beta = min(beta, best['score'])
+            
+        if beta <= alpha:
+            break
+            
     return best
