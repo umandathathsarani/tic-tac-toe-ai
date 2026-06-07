@@ -2,27 +2,38 @@ import tkinter as tk
 from tkinter import messagebox
 import json
 import os
+import random
 from game import TicTacToe
 from ai import minimax
-
-LEVELS = {
-    1: {"grid_size": 3, "win_req": 3, "dead": []},
-    2: {"grid_size": 4, "win_req": 3, "dead": [0, 3, 12, 15]},
-    3: {"grid_size": 4, "win_req": 4, "dead": []},
-    4: {"grid_size": 5, "win_req": 4, "dead": [12]},
-    5: {"grid_size": 5, "win_req": 4, "dead": [0, 4, 20, 24]}
-}
 
 SAVE_FILE = "save_data.json"
 
 class CampaignGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Tic-Tac-Toe: Campaign Mode")
+        self.root.title("Tic-Tac-Toe: Infinite Campaign")
         self.current_level = self.load_progress()
         self.game = None
         self.buttons = []
         self.setup_menu()
+
+    def get_level_data(self, level):
+        grid_size = min(12, 3 + (level - 1) // 3)
+        
+        if grid_size <= 4:
+            win_req = 3
+        elif grid_size <= 6:
+            win_req = 4
+        else:
+            win_req = 5
+            
+        num_dead = min((grid_size * grid_size) // 5, (level - 1))
+        
+        random.seed(level)
+        dead = random.sample(range(grid_size * grid_size), num_dead)
+        random.seed()
+        
+        return {"grid_size": grid_size, "win_req": win_req, "dead": dead}
 
     def load_progress(self):
         if os.path.exists(SAVE_FILE):
@@ -39,18 +50,14 @@ class CampaignGUI:
         self.menu_frame = tk.Frame(self.root)
         self.menu_frame.pack(pady=20, padx=50)
         
-        if self.current_level > max(LEVELS.keys()):
-            tk.Label(self.menu_frame, text="You beat the game!", font=('Arial', 18, 'bold')).pack(pady=10)
-            tk.Button(self.menu_frame, text="Reset Progress", font=('Arial', 12), command=self.reset_campaign).pack(pady=5)
-            return
-
         tk.Label(self.menu_frame, text=f"Level {self.current_level}", font=('Arial', 18, 'bold')).pack(pady=10)
         
-        level_data = LEVELS[self.current_level]
+        level_data = self.get_level_data(self.current_level)
         desc = f"Grid: {level_data['grid_size']}x{level_data['grid_size']}\nWin: {level_data['win_req']} in a row"
         tk.Label(self.menu_frame, text=desc, font=('Arial', 12)).pack(pady=5)
         
         tk.Button(self.menu_frame, text="Play Level", font=('Arial', 14), bg="green", fg="white", command=self.start_level).pack(pady=15)
+        tk.Button(self.menu_frame, text="Reset Progress", font=('Arial', 10), command=self.reset_campaign).pack(pady=5)
 
     def reset_campaign(self):
         self.current_level = 1
@@ -61,7 +68,7 @@ class CampaignGUI:
     def start_level(self):
         self.menu_frame.pack_forget()
         
-        level_data = LEVELS[self.current_level]
+        level_data = self.get_level_data(self.current_level)
         self.game = TicTacToe(grid_size=level_data['grid_size'], 
                               win_requirement=level_data['win_req'], 
                               dead_squares=level_data['dead'])
@@ -70,14 +77,18 @@ class CampaignGUI:
         self.board_frame.pack(pady=10, padx=10)
         
         self.buttons = []
+        font_size = 18 if level_data['grid_size'] <= 5 else 12
+        btn_width = 4 if level_data['grid_size'] <= 5 else 2
+        btn_height = 2 if level_data['grid_size'] <= 5 else 1
+        
         for i in range(level_data['grid_size'] * level_data['grid_size']):
-            btn = tk.Button(self.board_frame, text=" ", font=('Arial', 18, 'bold'), width=4, height=2,
+            btn = tk.Button(self.board_frame, text=" ", font=('Arial', font_size, 'bold'), width=btn_width, height=btn_height,
                             command=lambda s=i: self.player_move(s))
             
             if i in level_data['dead']:
                 btn.config(state="disabled", bg="black")
                 
-            btn.grid(row=i // level_data['grid_size'], column=i % level_data['grid_size'], padx=2, pady=2)
+            btn.grid(row=i // level_data['grid_size'], column=i % level_data['grid_size'], padx=1, pady=1)
             self.buttons.append(btn)
 
     def player_move(self, square):
@@ -94,7 +105,7 @@ class CampaignGUI:
         if not self.game.empty_squares() or self.game.current_winner:
             return
             
-        square = minimax(self.game, 'O', depth=4)['position']
+        square = minimax(self.game, 'O', depth=3)['position']
             
         if square is not None:
             self.game.make_move(square, 'O')
